@@ -7,7 +7,29 @@ ENCLOSURE_FLOOR_CEILING = 1.8;
 ENCLOSURE_INNER_WALL = 1.2;
 ENCLOSURE_FILLET = 2;
 
+function get_enclosure_inner_height(
+    petri_dish_z,
+    petri_dish_clearance
+) = (
+    (petri_dish_z - ENCLOSURE_FLOOR_CEILING)
+    + PETRI_DISH_HEIGHT + petri_dish_clearance
+);
+
+function get_enclosure_height(
+    petri_dish_z,
+    petri_dish_clearance
+) = (
+    get_enclosure_inner_height(
+        petri_dish_z,
+        petri_dish_clearance
+    )
+    + ENCLOSURE_FLOOR_CEILING * 2
+);
+
 module enclosure(
+    inner_height,
+    height,
+
     wall = 2,
     brim = 6,
 
@@ -16,9 +38,9 @@ module enclosure(
     tolerance = 0,
 
     petri_dish_z,
-    petri_dish_clearance = 1,
+    petri_dish_clearance,
 
-    quick_preview = false
+    quick_preview = true
 ) {
     e = .0824;
 
@@ -26,10 +48,6 @@ module enclosure(
         + tolerance * 2 + petri_dish_clearance * 2;
     outer_diameter = inner_diameter + ENCLOSURE_WALL * 2;
     window_diameter = outer_diameter - brim * 2;
-
-    inner_height = (petri_dish_z - ENCLOSURE_FLOOR_CEILING)
-        + PETRI_DISH_HEIGHT + petri_dish_clearance;
-    height = inner_height + ENCLOSURE_FLOOR_CEILING * 2;
 
     module _outer() {
         module _end() {
