@@ -1,5 +1,6 @@
 use <../../poly555/openscad/lib/basic_shapes.scad>;
 
+include <control_panel.scad>;
 include <petri_dish.scad>;
 
 ENCLOSURE_WALL = 2.4;
@@ -26,7 +27,26 @@ function get_enclosure_height(
     + ENCLOSURE_FLOOR_CEILING * 2
 );
 
+function get_enclosure_inner_diameter(
+    tolerance,
+    petri_dish_clearance
+) = (
+    PETRI_DISH_DIAMETER
+    + tolerance * 2 + petri_dish_clearance * 2
+);
+
+function get_enclosure_diameter(
+    tolerance,
+    petri_dish_clearance
+) = (
+    get_enclosure_inner_diameter(tolerance, petri_dish_clearance)
+    + ENCLOSURE_WALL * 2
+);
+
 module enclosure(
+    inner_diameter,
+    diameter,
+
     inner_height,
     height,
 
@@ -34,6 +54,9 @@ module enclosure(
     brim = 6,
 
     fillet = ENCLOSURE_FILLET,
+
+    control_panel_z = 0,
+    control_panel_depth = 1,
 
     tolerance = 0,
 
@@ -44,15 +67,12 @@ module enclosure(
 ) {
     e = .0824;
 
-    inner_diameter = PETRI_DISH_DIAMETER
-        + tolerance * 2 + petri_dish_clearance * 2;
-    outer_diameter = inner_diameter + ENCLOSURE_WALL * 2;
-    window_diameter = outer_diameter - brim * 2;
+    window_diameter = diameter - brim * 2;
 
     module _outer() {
         module _end() {
             render() donut(
-                diameter = outer_diameter,
+                diameter = diameter,
                 thickness = fillet * 2,
                 segments = 36
             );
@@ -60,7 +80,7 @@ module enclosure(
 
         if (quick_preview) {
             cylinder(
-                d = outer_diameter,
+                d = diameter,
                 h = height
             );
         } else {
@@ -70,6 +90,16 @@ module enclosure(
                         _end();
                     }
                 }
+            }
+        }
+
+        translate([0, diameter / -2, control_panel_z]) {
+            rotate([90, 0, 0]) {
+                control_panel(
+                    depth = control_panel_depth,
+                    tolerance = tolerance,
+                    show_panel = true
+                );
             }
         }
     }

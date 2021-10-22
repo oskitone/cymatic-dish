@@ -1,3 +1,4 @@
+include <control_panel.scad>;
 include <enclosure.scad>;
 include <petri_dish.scad>;
 
@@ -5,8 +6,10 @@ module cymatic_dish(
     petri_dish_clearance = 1,
     tolerance = 0,
     quick_preview = false,
-    debug = true
+    debug = false
 ) {
+    e = .04281;
+
     PERIPHERAL_HEIGHT = 50; // TODO: replace
     petri_dish_z = ENCLOSURE_FLOOR_CEILING + PERIPHERAL_HEIGHT;
 
@@ -19,11 +22,37 @@ module cymatic_dish(
         petri_dish_clearance
     );
 
+    enclosure_inner_diameter = get_enclosure_inner_diameter(
+        tolerance,
+        petri_dish_clearance
+    );
+    enclosure_diameter = get_enclosure_diameter(tolerance, petri_dish_clearance);
+
+    control_panel_z = enclosure_height / 2;
+    control_panel_depth = 10;
+
+    module _control_panel() {
+        translate([0, enclosure_diameter / -2 + e, control_panel_z]) {
+            rotate([90, 0, 0]) {
+                # control_panel(
+                    depth = control_panel_depth,
+                    tolerance = tolerance,
+                    show_knobs = true,
+                    show_labels = true
+                );
+            }
+        }
+    }
+
     difference() {
         group() {
             enclosure(
+                inner_diameter = enclosure_inner_diameter,
+                diameter = enclosure_diameter,
                 inner_height = enclosure_inner_height,
                 height = enclosure_height,
+                control_panel_z = control_panel_z,
+                control_panel_depth = control_panel_depth,
                 tolerance = tolerance,
                 petri_dish_z = petri_dish_z,
                 petri_dish_clearance = petri_dish_clearance,
@@ -33,6 +62,8 @@ module cymatic_dish(
             translate([0, 0, petri_dish_z]) {
                 % petri_dish();
             }
+
+            _control_panel();
         }
 
         if (debug) {
@@ -45,5 +76,6 @@ module cymatic_dish(
 
 cymatic_dish(
     tolerance = .1,
-    quick_preview = 1
+    quick_preview = false,
+    debug = false
 );
