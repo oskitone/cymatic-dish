@@ -79,15 +79,25 @@ module control_panel(
 
     module _panel() {
         translate([width / -2 - chamfer_x, length / -2 - chamfer_y, -depth]) {
-            flat_top_rectangular_pyramid(
-                top_width = width,
-                top_length = length,
+            hull() {
+                cube([
+                    width + chamfer_x * 2,
+                    length + chamfer_y * 2,
+                    e
+                ]);
 
-                bottom_width = width + chamfer_x * 2,
-                bottom_length = length + chamfer_y * 2,
-
-                height = depth
-            );
+                for (
+                    x = [chamfer_x, width + chamfer_x],
+                    y = [chamfer_y, length + chamfer_y]
+                ) {
+                    translate([x, y, depth - fillet]) {
+                        sphere(
+                            r = fillet,
+                            $fn = undef
+                        );
+                    }
+                }
+            }
         }
     }
 
