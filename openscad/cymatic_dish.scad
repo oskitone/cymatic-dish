@@ -34,7 +34,7 @@ module cymatic_dish(
     module _control_panel() {
         translate([0, enclosure_diameter / -2 + e, control_panel_z]) {
             rotate([90, 0, 0]) {
-                # control_panel(
+                control_panel(
                     depth = control_panel_depth,
                     tolerance = tolerance,
                     show_knobs = true,

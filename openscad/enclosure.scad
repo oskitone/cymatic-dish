@@ -7,6 +7,7 @@ ENCLOSURE_WALL = 2.4;
 ENCLOSURE_FLOOR_CEILING = 1.8;
 ENCLOSURE_INNER_WALL = 1.2;
 ENCLOSURE_FILLET = 2;
+ENCLOSURE_ENGRAVING_DEPTH = 1.2;
 
 function get_enclosure_inner_height(
     petri_dish_z,

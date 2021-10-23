@@ -1,3 +1,4 @@
+use <../../apc/openscad/wheels.scad>;
 use <../../poly555/openscad/lib/basic_shapes.scad>;
 use <../../poly555/openscad/lib/engraving.scad>;
 
@@ -21,10 +22,15 @@ module control_panel(
 
     tolerance = 0,
 
+    color = "#fff",
+    cavity_color = "#eee",
+
     show_knobs = false,
     show_labels = false,
     show_panel = false
 ) {
+    e = .0525;
+
     count = len(labels);
 
     width = knob_diameter * count + gutter * (count - 1)
@@ -41,9 +47,16 @@ module control_panel(
             label_size + label_gutter + knob_diameter / 2,
             0
         ]) {
-            cylinder(
-                d = knob_diameter,
-                h = knob_height
+            wheel(
+                diameter = knob_diameter,
+                height = knob_height,
+                spokes_count = 0,
+                brodie_knob_count = 0,
+                dimple_count = 1,
+                dimple_depth = ENCLOSURE_ENGRAVING_DEPTH,
+                color = color,
+                cavity_color = cavity_color,
+                tolerance = tolerance
             );
         }
     }
