@@ -35,6 +35,7 @@ module cymatic_dish(
         translate([0, enclosure_diameter / -2 + e, control_panel_z]) {
             rotate([90, 0, 0]) {
                 control_panel(
+                    engraving_depth = ENCLOSURE_ENGRAVING_DEPTH,
                     depth = control_panel_depth,
                     tolerance = tolerance,
                     show_knobs = true,

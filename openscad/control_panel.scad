@@ -15,7 +15,9 @@ module control_panel(
     label_gutter = 2,
     label_height = 1,
 
-    fillet = ENCLOSURE_FILLET,
+    engraving_depth = 1,
+
+    fillet = 0,
     depth = 1,
     chamfer_x = undef,
     chamfer_y = undef,
@@ -53,7 +55,7 @@ module control_panel(
                 spokes_count = 0,
                 brodie_knob_count = 0,
                 dimple_count = 1,
-                dimple_depth = ENCLOSURE_ENGRAVING_DEPTH,
+                dimple_depth = engraving_depth,
                 color = color,
                 cavity_color = cavity_color,
                 tolerance = tolerance
@@ -92,7 +94,7 @@ module control_panel(
                 ) {
                     translate([x, y, depth - fillet]) {
                         sphere(
-                            r = fillet,
+                            r = max(e, fillet),
                             $fn = undef
                         );
                     }
