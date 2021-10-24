@@ -57,7 +57,8 @@ module enclosure(
     fillet = ENCLOSURE_FILLET,
 
     control_panel_z = 0,
-    control_panel_depth = 1,
+    control_panel_depth = 0,
+    control_panel_inset = 0,
 
     tolerance = 0,
 
@@ -69,6 +70,38 @@ module enclosure(
     e = .0824;
 
     window_diameter = diameter - brim * 2;
+
+    module _control_panel_inset_cavity() {
+        translate([0, diameter / -2, control_panel_z]) {
+            rotate([90, 0, 0]) {
+                control_panel(
+                    outer_gutter = CONTROL_PANEL_DEFAULT_OUTER_GUTTER
+                        + control_panel_inset,
+                    depth = control_panel_inset,
+                    chamfer_x = -control_panel_inset,
+                    chamfer_y = -control_panel_inset,
+                    tolerance = tolerance,
+                    show_panel = true
+                );
+            }
+        }
+    }
+
+    module _control_panel_outer_depth() {
+        translate([0, diameter / -2 + 0, control_panel_z]) {
+            rotate([90, 0, 0]) {
+                control_panel(
+                    outer_gutter = CONTROL_PANEL_DEFAULT_OUTER_GUTTER
+                        + control_panel_inset,
+                    depth = control_panel_depth + control_panel_inset,
+                    chamfer_x = -control_panel_inset,
+                    chamfer_y = -control_panel_inset,
+                    tolerance = tolerance,
+                    show_panel = true
+                );
+            }
+        }
+    }
 
     module _outer() {
         module _end() {
@@ -94,32 +127,56 @@ module enclosure(
             }
         }
 
-        translate([0, diameter / -2, control_panel_z]) {
-            rotate([90, 0, 0]) {
-                control_panel(
-                    depth = control_panel_depth,
-                    tolerance = tolerance,
-                    show_panel = true
+        if (control_panel_depth > 0 && control_panel_inset == 0) {
+            _control_panel_outer_depth();
+        }
+    }
+
+    module _control_panel_backing() {
+        intersection() {
+            translate([0, wall, 0]) {
+                difference() {
+                    _control_panel_inset_cavity();
+
+                    translate([0, -control_panel_depth, 0]) {
+                        _control_panel_inset_cavity();
+                    }
+                }
+            }
+
+            translate([0, 0, e]) {
+                cylinder(
+                    d = diameter - e * 2,
+                    h = height - e * 2,
+                    $fn = 36
                 );
             }
         }
     }
 
-    difference() {
-        _outer();
+    group() {
+        difference() {
+            _outer();
 
-        translate([0, 0, ENCLOSURE_FLOOR_CEILING]) {
-            cylinder(
-                d = inner_diameter,
-                h = inner_height
-            );
+            translate([0, 0, ENCLOSURE_FLOOR_CEILING]) {
+                cylinder(
+                    d = inner_diameter,
+                    h = inner_height
+                );
+            }
+
+            translate([0, 0, height - ENCLOSURE_FLOOR_CEILING - e]) {
+                cylinder(
+                    d = window_diameter,
+                    h = ENCLOSURE_FLOOR_CEILING + e * 2
+                );
+            }
+
+            if (control_panel_inset > 0) {
+                _control_panel_inset_cavity();
+            }
         }
 
-        translate([0, 0, height - ENCLOSURE_FLOOR_CEILING - e]) {
-            cylinder(
-                d = window_diameter,
-                h = ENCLOSURE_FLOOR_CEILING + e * 2
-            );
-        }
+        _control_panel_backing();
     }
 }

@@ -10,7 +10,7 @@ module cymatic_dish(
 ) {
     e = .04281;
 
-    PERIPHERAL_HEIGHT = 50; // TODO: replace
+    PERIPHERAL_HEIGHT = 70; // TODO: replace
     petri_dish_z = ENCLOSURE_FLOOR_CEILING + PERIPHERAL_HEIGHT;
 
     enclosure_inner_height = get_enclosure_inner_height(
@@ -28,11 +28,16 @@ module cymatic_dish(
     );
     enclosure_diameter = get_enclosure_diameter(tolerance, petri_dish_clearance);
 
+    control_panel_inset = KNOB_DEFAULT_HEIGHT;
     control_panel_z = enclosure_height / 2;
-    control_panel_depth = 10;
+    control_panel_depth = 2;
 
     module _control_panel() {
-        translate([0, enclosure_diameter / -2 + e, control_panel_z]) {
+        translate([
+            0,
+            enclosure_diameter / -2 + control_panel_inset - e,
+            control_panel_z
+        ]) {
             rotate([90, 0, 0]) {
                 control_panel(
                     engraving_depth = ENCLOSURE_ENGRAVING_DEPTH,
@@ -54,6 +59,7 @@ module cymatic_dish(
                 height = enclosure_height,
                 control_panel_z = control_panel_z,
                 control_panel_depth = control_panel_depth,
+                control_panel_inset = control_panel_inset,
                 tolerance = tolerance,
                 petri_dish_z = petri_dish_z,
                 petri_dish_clearance = petri_dish_clearance,

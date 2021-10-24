@@ -2,14 +2,17 @@ use <../../apc/openscad/wheels.scad>;
 use <../../poly555/openscad/lib/basic_shapes.scad>;
 use <../../poly555/openscad/lib/engraving.scad>;
 
+KNOB_DEFAULT_HEIGHT = 10;
+CONTROL_PANEL_DEFAULT_OUTER_GUTTER = 3;
+
 module control_panel(
     labels = ["VOL", "FREQ"],
 
     knob_diameter = 20,
-    knob_height = 10,
+    knob_height = KNOB_DEFAULT_HEIGHT,
 
     gutter = 3,
-    outer_gutter = 3,
+    outer_gutter = CONTROL_PANEL_DEFAULT_OUTER_GUTTER,
 
     label_size = 3.2,
     label_gutter = 2,
