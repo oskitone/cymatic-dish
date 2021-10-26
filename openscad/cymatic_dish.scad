@@ -4,7 +4,14 @@ include <petri_dish.scad>;
 
 module cymatic_dish(
     petri_dish_clearance = 1,
+
     tolerance = 0,
+
+    enclosure_color = "#FF69B4",
+    enclosure_cavity_color = "#CC5490",
+    knob_color = "white",
+    knob_cavity_color = "#eee",
+
     quick_preview = false,
     debug = false
 ) {
@@ -43,8 +50,9 @@ module cymatic_dish(
                     labels = control_panel_labels,
                     engraving_depth = ENCLOSURE_ENGRAVING_DEPTH,
                     tolerance = tolerance,
-                    show_knobs = true,
-                    show_labels = true
+                    color = knob_color,
+                    cavity_color = knob_cavity_color,
+                    show_knobs = true
                 );
             }
         }
@@ -57,16 +65,15 @@ module cymatic_dish(
                 diameter = enclosure_diameter,
                 inner_height = enclosure_inner_height,
                 height = enclosure_height,
-                control_panel_width = get_control_panel_width(
-                    count = len(control_panel_labels)
-                ),
-                control_panel_height = get_control_panel_length(),
+                control_panel_labels = control_panel_labels,
                 control_panel_z = control_panel_z,
                 control_panel_outset = control_panel_outset,
                 control_panel_inset = control_panel_inset,
                 tolerance = tolerance,
                 petri_dish_z = petri_dish_z,
                 petri_dish_clearance = petri_dish_clearance,
+                color = enclosure_color,
+                cavity_color = enclosure_cavity_color,
                 quick_preview = quick_preview
             );
 

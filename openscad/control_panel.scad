@@ -51,8 +51,8 @@ module control_panel(
 
     tolerance = 0,
 
-    color = "#fff",
-    cavity_color = "#eee",
+    color = undef,
+    cavity_color = undef,
 
     show_knobs = false,
     show_labels = false,

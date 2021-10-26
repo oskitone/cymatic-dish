@@ -56,8 +56,7 @@ module enclosure(
 
     fillet = ENCLOSURE_FILLET,
 
-    control_panel_width = 0,
-    control_panel_height = 0,
+    control_panel_labels = [],
     control_panel_z = 0,
     control_panel_outset = 0,
     control_panel_outset_brim = ENCLOSURE_FILLET,
@@ -68,11 +67,17 @@ module enclosure(
     petri_dish_z,
     petri_dish_clearance,
 
+    color = undef,
+    cavity_color = undef,
+
     quick_preview = true
 ) {
     e = .0824;
 
     window_diameter = diameter - brim * 2;
+
+    control_panel_width = get_control_panel_width(len(control_panel_labels));
+    control_panel_height = get_control_panel_length();
 
     module _control_panel_inset_cavity(bleed = 0) {
         translate([
@@ -145,29 +150,55 @@ module enclosure(
         }
     }
 
+    module _control_panel_labels() {
+        y = diameter / -2 + control_panel_inset - control_panel_outset;
+
+        translate([0, y, control_panel_z]) {
+            rotate([90, 0, 0]) {
+                control_panel(
+                    labels = control_panel_labels,
+                    label_height = CONTROL_PANEL_DEFAULT_LABEL_HEIGHT + e,
+                    engraving_depth = ENCLOSURE_ENGRAVING_DEPTH,
+                    tolerance = tolerance,
+                    show_labels = true
+                );
+            }
+        }
+    }
+
     group() {
         difference() {
-            _outer();
-
-            translate([0, 0, ENCLOSURE_FLOOR_CEILING]) {
-                cylinder(
-                    d = inner_diameter,
-                    h = inner_height
-                );
+            color(color) {
+                _outer();
             }
 
-            translate([0, 0, height - ENCLOSURE_FLOOR_CEILING - e]) {
-                cylinder(
-                    d = window_diameter,
-                    h = ENCLOSURE_FLOOR_CEILING + e * 2
-                );
-            }
+            color(cavity_color) {
+                translate([0, 0, ENCLOSURE_FLOOR_CEILING]) {
+                    cylinder(
+                        d = inner_diameter,
+                        h = inner_height
+                    );
+                }
 
-            if (control_panel_inset > 0) {
-                _control_panel_inset_cavity();
+                translate([0, 0, height - ENCLOSURE_FLOOR_CEILING - e]) {
+                    cylinder(
+                        d = window_diameter,
+                        h = ENCLOSURE_FLOOR_CEILING + e * 2
+                    );
+                }
+
+                if (control_panel_inset > 0) {
+                    _control_panel_inset_cavity();
+                }
             }
         }
 
-        _control_panel_backing();
+        color(cavity_color) {
+            _control_panel_backing();
+        }
+
+        color(color) {
+            _control_panel_labels();
+        }
     }
 }
