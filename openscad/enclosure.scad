@@ -56,8 +56,11 @@ module enclosure(
 
     fillet = ENCLOSURE_FILLET,
 
+    control_panel_width = 0,
+    control_panel_height = 0,
     control_panel_z = 0,
-    control_panel_depth = 0,
+    control_panel_outset = 0,
+    control_panel_outset_brim = ENCLOSURE_FILLET,
     control_panel_inset = 0,
 
     tolerance = 0,
@@ -71,35 +74,17 @@ module enclosure(
 
     window_diameter = diameter - brim * 2;
 
-    module _control_panel_inset_cavity() {
-        translate([0, diameter / -2, control_panel_z]) {
-            rotate([90, 0, 0]) {
-                control_panel(
-                    outer_gutter = CONTROL_PANEL_DEFAULT_OUTER_GUTTER
-                        + control_panel_inset,
-                    depth = control_panel_inset,
-                    chamfer_x = -control_panel_inset,
-                    chamfer_y = -control_panel_inset,
-                    tolerance = tolerance,
-                    show_panel = true
-                );
-            }
-        }
-    }
-
-    module _control_panel_outer_depth() {
-        translate([0, diameter / -2 + 0, control_panel_z]) {
-            rotate([90, 0, 0]) {
-                control_panel(
-                    outer_gutter = CONTROL_PANEL_DEFAULT_OUTER_GUTTER
-                        + control_panel_inset,
-                    depth = control_panel_depth + control_panel_inset,
-                    chamfer_x = -control_panel_inset,
-                    chamfer_y = -control_panel_inset,
-                    tolerance = tolerance,
-                    show_panel = true
-                );
-            }
+    module _control_panel_inset_cavity(bleed = 0) {
+        translate([
+            control_panel_width / -2 - bleed,
+            diameter / -2 - control_panel_outset,
+            control_panel_z - control_panel_height / 2 - bleed
+        ]) {
+            cube([
+                control_panel_width + bleed * 2,
+                control_panel_inset + bleed,
+                control_panel_height + bleed * 2
+            ]);
         }
     }
 
@@ -112,36 +97,42 @@ module enclosure(
             );
         }
 
-        if (quick_preview) {
-            cylinder(
-                d = diameter,
-                h = height
-            );
-        } else {
-            hull() {
+        hull() {
+            if (quick_preview) {
+                cylinder(
+                    d = diameter,
+                    h = height
+                );
+            } else {
                 for (z = [fillet, height - fillet]) {
                     translate([0, 0, z]) {
                         _end();
                     }
                 }
             }
-        }
 
-        if (control_panel_depth > 0 && control_panel_inset == 0) {
-            _control_panel_outer_depth();
+            if (control_panel_outset > 0) {
+                translate([
+                    control_panel_width / -2 - control_panel_outset_brim,
+                    diameter / -2 + control_panel_inset - control_panel_outset,
+                    control_panel_z - control_panel_height / 2
+                        - control_panel_outset_brim
+                ]) {
+                    cube([
+                        control_panel_width + control_panel_outset_brim * 2,
+                        e,
+                        control_panel_height + control_panel_outset_brim * 2
+                    ]);
+                }
+            }
         }
     }
 
     module _control_panel_backing() {
         intersection() {
-            translate([0, wall, 0]) {
-                difference() {
-                    _control_panel_inset_cavity();
-
-                    translate([0, -control_panel_depth, 0]) {
-                        _control_panel_inset_cavity();
-                    }
-                }
+            difference() {
+                _control_panel_inset_cavity(wall);
+                translate([0, -e, 0]) _control_panel_inset_cavity(e);
             }
 
             translate([0, 0, e]) {
