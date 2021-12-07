@@ -1,3 +1,7 @@
+#define CIRCULAR_BUFFER_DEBUG
+#include <CircularBuffer.h>
+#define BUFFER_MAX 5
+
 const int SPEAKER_PIN = 11;
 const int FREQUENCY_CONTROL_PIN = A0;
 
@@ -10,8 +14,21 @@ const bool DEBUG = true;
 
 float frequency = 0;
 
-float getVoltage(int pin) {
-  return analogRead(pin) * (5.0 / 1023.0) / 5;
+CircularBuffer<float, BUFFER_MAX> _buffer;
+float getVoltage(float pin) {
+  float newVoltage = analogRead(pin) * (5.0 / 1023.0) / 5;
+
+  _buffer.push(newVoltage);
+
+  float total = 0;
+
+  for (float i = 0; i < _buffer.size(); i++) {
+    total += _buffer[i];
+  }
+
+  float average = total / _buffer.size();
+
+  return average;
 }
 
 unsigned long oldMillis = 0;
@@ -21,7 +38,7 @@ float getFrequency(bool skipPoll = false) {
 
   if (skipPoll || pollPasses) {
     oldMillis = newMillis;
-    return round(MIN + (MAX - MIN) * getVoltage(FREQUENCY_CONTROL_PIN));
+    return MIN + (MAX - MIN) * getVoltage(FREQUENCY_CONTROL_PIN);
   }
 
   return frequency;
@@ -29,6 +46,7 @@ float getFrequency(bool skipPoll = false) {
 
 void setup() {
   Serial.begin(9600);
+
   pinMode(LED_BUILTIN, OUTPUT);
   digitalWrite(LED_BUILTIN, HIGH);
 }
