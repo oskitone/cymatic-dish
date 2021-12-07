@@ -1,6 +1,6 @@
 #define CIRCULAR_BUFFER_DEBUG
 #include <CircularBuffer.h>
-#define BUFFER_MAX 5
+#define BUFFER_MAX 30
 
 const int SPEAKER_PIN = 11;
 const int FREQUENCY_CONTROL_PIN = A0;
@@ -14,21 +14,23 @@ const bool DEBUG = true;
 
 float frequency = 0;
 
-CircularBuffer<float, BUFFER_MAX> _buffer;
-float getVoltage(float pin) {
-  float newVoltage = analogRead(pin) * (5.0 / 1023.0) / 5;
+CircularBuffer<int, BUFFER_MAX> readingsBuffer;
+float getVoltage(
+    float pin,
+    int fidelity = 10000
+) {
+  int newReading = analogRead(pin);
 
-  _buffer.push(newVoltage);
+  readingsBuffer.push(newReading);
 
-  float total = 0;
-
-  for (float i = 0; i < _buffer.size(); i++) {
-    total += _buffer[i];
+  int readingsTotal = 0;
+  for (float i = 0; i < readingsBuffer.size(); i++) {
+    readingsTotal += readingsBuffer[i];
   }
+  float readingsAverage = readingsTotal / readingsBuffer.size();
 
-  float average = total / _buffer.size();
-
-  return average;
+  return round(readingsAverage * (5.0 / 1023.0) / 5 * fidelity)
+    / float(fidelity);
 }
 
 unsigned long oldMillis = 0;
