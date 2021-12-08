@@ -1,6 +1,7 @@
 include <control_panel.scad>;
 include <enclosure.scad>;
 include <petri_dish.scad>;
+include <speaker.scad>;
 
 $fn = 60;
 
@@ -10,8 +11,8 @@ module petri_dish_grip(
     dish_diameter = PETRI_DISH_DIAMETER ,
     dish_height = PETRI_DISH_HEIGHT,
 
-    speaker_cavity_diameter = 44.5,
-    speaker_brim_height = 2.3,
+    speaker_cavity_diameter = SPEAKER_DIAMETER - SPEAKER_BRIM_DEPTH * 2,
+    speaker_brim_height = SPEAKER_BRIM_HEIGHT,
 
     background_disc_height = .6,
     floor_height = 1,
@@ -63,22 +64,26 @@ floor_height = 1;
 
 difference() {
     group() {
-        translate([0, 0, floor_height + background_disc_height + .01]) {
+        translate([0, 0, floor_height + background_disc_height + SPEAKER_BRIM_HEIGHT + .01]) {
             % petri_dish();
         }
 
-        translate([0, 0, floor_height]) {
+        translate([0, 0, floor_height + SPEAKER_BRIM_HEIGHT]) {
             # background_disc(height = background_disc_height);
         }
 
-        ! petri_dish_grip(
+        translate([0, 0, floor_height - SPEAKER_TOTAL_HEIGHT + SPEAKER_BRIM_HEIGHT]) {
+            % speaker();
+        }
+
+        petri_dish_grip(
             tolerance = .2,
             background_disc_height = background_disc_height,
             floor_height = floor_height
         );
     }
 
-    * translate([0, -100, -1]) {
-        cube([100, 100 * 2, 100]);
+    * translate([0, -100, -100]) {
+        cube([100, 100 * 2, 100 * 2]);
     }
 }
