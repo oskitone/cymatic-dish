@@ -14,6 +14,7 @@ module petri_dish_grip(
 
     speaker_cavity_diameter = SPEAKER_DIAMETER - SPEAKER_BRIM_DEPTH * 2,
     speaker_brim_height = SPEAKER_BRIM_HEIGHT,
+    speaker_brim_depth = SPEAKER_BRIM_DEPTH,
     speaker_magnet_height = SPEAKER_MAGNET_HEIGHT,
     speaker_magnet_diameter = SPEAKER_MAGNET_DIAMETER,
 
@@ -35,9 +36,31 @@ module petri_dish_grip(
     cone_cavity_height = SPEAKER_CONE_HEIGHT - rattle_gap - floor_height;
     bottom_height = SPEAKER_MAGNET_HEIGHT + cone_cavity_height + floor_height;
 
+    module _webs(
+        count = 3,
+        width = inner_wall,
+        height = 0,
+        y = 0
+    ) {
+        length = outer_diameter / 2 - wall - y + e;
+
+        for (i = [0 : count - 1]) {
+            rotate([0, 0, 360 * (i / count)]) {
+                translate([width / -2, y, floor_height - e]) {
+                    cube([width, length, height + e]);
+                }
+            }
+        }
+    }
+
     module _top() {
         cavity_height = dish_height + background_disc_height + speaker_brim_height;
         outer_height = cavity_height + floor_height;
+
+        _webs(
+            height = speaker_brim_height,
+            y = speaker_cavity_diameter / 2 + speaker_brim_depth + tolerance
+        );
 
         difference() {
             cylinder(d = outer_diameter, h = outer_height);
@@ -104,30 +127,12 @@ module petri_dish_grip(
             }
         }
 
-        module _webs(
-            count = 5,
-            width = inner_wall
-        ) {
-            y = magnet_grip_cavity_diameter / 2 + e;
-
-            length = outer_diameter / 2 - wall - y + e;
-
-            for (i = [0 : count - 1]) {
-                rotate([0, 0, 360 * (i / count)]) {
-                    translate([width / -2, y, floor_height - e]) {
-                        cube([
-                            width,
-                            length,
-                            magnet_grip_height + e
-                        ]);
-                    }
-                }
-            }
-        }
-
         _outer();
         _magnet_grip();
-        _webs();
+        _webs(
+            height = magnet_grip_height,
+            y = magnet_grip_cavity_diameter / 2 + e
+        );
     }
 
     if (show_top) {
@@ -157,21 +162,22 @@ floor_height = 1;
 difference() {
     group() {
         translate([0, 0, floor_height + background_disc_height + SPEAKER_BRIM_HEIGHT + .01]) {
-            % petri_dish();
+            * % petri_dish();
         }
 
         translate([0, 0, floor_height + SPEAKER_BRIM_HEIGHT]) {
-            # background_disc(height = background_disc_height);
+            * # background_disc(height = background_disc_height);
         }
 
         translate([0, 0, floor_height - SPEAKER_TOTAL_HEIGHT + SPEAKER_BRIM_HEIGHT]) {
-            % speaker();
+            * % speaker();
         }
 
         petri_dish_grip(
             tolerance = .2,
             background_disc_height = background_disc_height,
-            floor_height = floor_height
+            floor_height = floor_height,
+            show_bottom = 0
         );
     }
 
